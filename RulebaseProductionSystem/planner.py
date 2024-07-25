@@ -231,3 +231,4 @@ def planner(initial_state, facts, positions, constraints, final_state, iteration
     history.append(new_state)
     print("No. of rejected states: ", len(rejected_states))
     rejected_states = []
+    return history
