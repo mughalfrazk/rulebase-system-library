@@ -159,8 +159,8 @@ def step(state, agents, no_of_movable_agents, rejected_state = []):
 
   possible_new_state = list(state)
   iteration += 1
-  if iteration == 500:
-    return possible_new_state
+  # if iteration == 500:
+  #   return possible_new_state
 
   random_number_of_movable_agents = 0
   if no_of_movable_agents > len(agents):
@@ -222,8 +222,6 @@ def planner(initial_state, facts, positions, constraints, final_state, iteration
   while True:
     if isGoalAchieved(current_state, final_state):
       print("Goal is achieved!!!")
-      print(history)
-      print(current_state)
       break
 
     new_state = step(current_state, movable_agents, total_no_of_movable_agents)
