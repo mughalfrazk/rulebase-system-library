@@ -106,7 +106,7 @@ def isAnyConstraintFailing(constraint_objs, state):
             if constraint not in source_of_truth:
               constraint_applied = False
       
-        if constraint_applied: return constraint_applied
+        if constraint_applied: return constraint_obj_item
     return False
 
 def getRandomPositionExcept(current, pos):
@@ -159,8 +159,6 @@ def step(state, agents, no_of_movable_agents, rejected_state = []):
 
   possible_new_state = list(state)
   iteration += 1
-  # if iteration == 500:
-  #   return possible_new_state
 
   random_number_of_movable_agents = 0
   if no_of_movable_agents > len(agents):
@@ -183,17 +181,23 @@ def step(state, agents, no_of_movable_agents, rejected_state = []):
         possible_new_state[random_idx] = single_state.replace(single_state_arr[1], getRandomPositionExcept(single_state_arr[1], pos))
         changed_idxs.append(random_idx)
 
-  is_rejecting_state = isStateInTheList(possible_new_state, rejected_states)
+  is_rejected_state = isStateInTheList(possible_new_state, rejected_states)
   is_looping = isStateInTheList(possible_new_state, history)
 
-  if not is_rejecting_state and not is_looping:
-    verified = isAnyConstraintFailing(constraints_list, possible_new_state)
-    if not verified:
-      return possible_new_state
-    return step(state, agents, no_of_movable_agents, list(possible_new_state))
+  if not is_looping and not is_rejected_state:
+    # verified = isAnyConstraintFailing(constraints_list, possible_new_state)
+    # if not verified:
+    return possible_new_state
+    # return step(state, agents, no_of_movable_agents, list(possible_new_state))
   return step(state, agents, no_of_movable_agents)
 
 # Main
+
+def apply_action(action, state):
+  if action == "undo":
+    return history[-1]
+  else:
+    return state
 
 def planner(initial_state, facts, positions, constraints, final_state, iteration_limit = 1000):
   global current_state
@@ -220,14 +224,21 @@ def planner(initial_state, facts, positions, constraints, final_state, iteration
   total_no_of_movable_agents = totalNumbersOfMovableActors(general_facts, movable_agents)
 
   while True:
+    constraint_passed = False
     if isGoalAchieved(current_state, final_state):
       print("Goal is achieved!!!")
       break
-
-    new_state = step(current_state, movable_agents, total_no_of_movable_agents)
-    current_state = list(new_state)
-    history.append(new_state)
-    print("No. of rejected states: ", len(rejected_states))
+    while not constraint_passed:
+      current_state = list(step(current_state, movable_agents, total_no_of_movable_agents))
+      constraint_applied = isAnyConstraintFailing(constraints_list, current_state)
+      if constraint_applied == False:
+        history.append(current_state)
+        constraint_passed = True
+      else:
+        after_action_state = apply_action(constraint_applied["action"], current_state)
+        rejected_states.append(current_state)
+        current_state = list(after_action_state)
+    
+    print("No. of rejected states: ", len(rejected_states)) 
     rejected_states = []
-  
   return history
