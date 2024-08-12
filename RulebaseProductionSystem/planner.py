@@ -70,10 +70,24 @@ def totalNumbersOfMovableActors(general_facts, movable_agents = []):
   return count
 
 def updateConstraintWithValues(constraint, variables_values):
+  """
+  Replace constraint vairables with the values
+  :param constraint: list of constraint strings from one constraint item
+  :param variables_values: variables with values as key/value pairs
+  :return: updated constraint strings list
+  """
+    
   pattern = re.compile("|".join(variables_values.keys()))
   return [replaceWordsFromText(pattern, variables_values, text) for text in constraint]
 
 def isAnyConstraintFailing(constraint_objs, state):
+  """
+  Check if any constraint is failing from the list of constraints.
+  :param constraint_objs: list of constraint from input
+  :param state: state to verify against constraints
+  :return: returns either False or the Failed constraint 
+  """
+
   for constraint_obj_item in constraint_objs:
     variables_values = {
       "var_actor_1": "",
@@ -110,24 +124,61 @@ def isAnyConstraintFailing(constraint_objs, state):
     return False
 
 def getRandomPositionExcept(current, pos):
+  """
+  Select random position except the current one.
+  :param current: the current position of the agent
+  :param pos: position dictionary from the input
+  :return: a random position except the current one. 
+  """
+
   positionPositions = [p for p in pos["values"] if p != current]
   return positionPositions[getRandomNumberFromRange(len(positionPositions) - 1)]
 
 def isStateInTheList(state, list_of_states):
+  """
+  Check if an item is present in the list.
+  :param state: item to check
+  :param list_of_states: list to check the item in
+  :return: returns True if item is in list otherwise False
+  """
+
   if state in list_of_states:
     return True
   return False
 
 def isGoalAchieved(state, final_state):
+  """
+  Check if the state is equal to the goal from input
+  :param state: current state to compare with
+  :param final_state: goal from the input
+  :return: returns True if state is equal to goal otherwise False
+  """
+
   if state == final_state:
     return True
   return False
 
 def generateRandomIndex(state, changed_idxs):
+  """
+  Returns a random index from state list except the ones already present in the list provided
+  :param state: current state
+  :param changed_idxs: already selected indexes list, excluded options to select.
+  :return: return a random index which is not present in 'changed_idxs' 
+  """
+
   num = getRandomNumberFromRange(len(state) - 1)
   return generateRandomIndex(state, changed_idxs) if num in changed_idxs else num
 
 def updateThePosition(itr_agent, itr_idx, agent, changed_idxs):
+  """
+  Update the position of the an agent in state
+  :param itr_agent: agent to change position
+  :param itr_idx: index of agent from the state
+  :param agent: agent name to compare
+  :param changed_idxs: list of indexes, updated with the agent index when the position is updated
+  :return: returns the agent state with updated position otherwise returns the previous position 
+  """
+
   itr_agent_arr = itr_agent.split(" isat ")
   if itr_agent_arr[0] == agent and itr_agent not in changed_idxs:
     updated_itr_agent = itr_agent.replace(itr_agent_arr[1], getRandomPositionExcept(itr_agent_arr[1], pos))
@@ -137,12 +188,27 @@ def updateThePosition(itr_agent, itr_idx, agent, changed_idxs):
     return itr_agent
 
 def getInchargeAgent(general_facts):
+  """
+  Check and return if there is any incharge agent defined in the facts. i.e. 'man moves all' makes man the incharge agent.
+  :param general_facts: facts list from the input
+  :return: return the list of agent who are defined as incharge in the facts
+  """
+
   incharge_agent = [agent.replace(" moves all", "") for agent in general_facts if agent.split(" ")[1] == "moves" and agent.split(" ")[2] == "all"]
   return incharge_agent[0]
 
 iteration = 0
 
 def step(state, agents, no_of_movable_agents, rejected_state = []):
+  """
+  Method used to calculate the next step of the agent(s).
+  :param state: current_state of the scenario
+  :param agents: list of agent who are incharge who must move in every step i.e. 'man moves' makes man moveable in every step
+  :param no_of_movable_agents: total number of agents that should move, as defined inside the facts i.e. '2 can_move' means upto 2 agents can move in a single step
+  :param rejected_state: receives a rejected_state if the method is being called recursively after a state is rejected
+  :return: returns a next step of the state
+  """
+
   global iteration
   global rejected_states
   global history
@@ -150,7 +216,6 @@ def step(state, agents, no_of_movable_agents, rejected_state = []):
   changed_idxs = []
   
   if (iteration >= itr_limit):
-    print(history)
     print("Its taking too long, let's try again!!!")
     state = init_state
     history = []
@@ -196,6 +261,17 @@ def step(state, agents, no_of_movable_agents, rejected_state = []):
 # Main
 
 def planner(initial_state, facts, positions, constraints, final_state, iteration_limit = 1000):
+  """
+  Planner method receives the input of the problem scenario and calculate the steps that'll be used to solve the problem, returns a plan with a list of list.
+  :param initial_state: initial state of the agent(s)
+  :param facts: list of general facts
+  :param positions: total number of position that are available in the problem
+  :param constraints: list of total constraints of the problem
+  :param final_state: goal of the problem
+  :param iteration_limit: iteration limit to refresh the planner if the state is stuck in a deadlock
+  :return: list of states as a plan to solve the problem
+  """
+  
   global current_state
   global init_state
   global general_facts
