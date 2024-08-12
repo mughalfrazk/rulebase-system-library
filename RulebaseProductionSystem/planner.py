@@ -206,14 +206,13 @@ def getInchargeAgent(general_facts):
 
 iteration = 0
 
-def step(state, agents, no_of_movable_agents, rejected_state = []):
+def step(state, agents, no_of_movable_agents):
   """
   Method used to calculate the next step of the agent(s).
 
   :param state: current_state of the scenario
   :param agents: list of agent who are incharge who must move in every step i.e. 'man moves' makes man moveable in every step
   :param no_of_movable_agents: total number of agents that should move, as defined inside the facts i.e. '2 can_move' means upto 2 agents can move in a single step
-  :param rejected_state: receives a rejected_state if the method is being called recursively after a state is rejected
   :return: returns a next step of the state
   """
 
@@ -224,7 +223,6 @@ def step(state, agents, no_of_movable_agents, rejected_state = []):
   changed_idxs = []
   
   if (iteration >= itr_limit):
-    print(history)
     print("Its taking too long, let's try again!!!")
     state = init_state
     history = []
@@ -237,9 +235,6 @@ def step(state, agents, no_of_movable_agents, rejected_state = []):
   random_number_of_movable_agents = 0
   if no_of_movable_agents > len(agents):
     random_number_of_movable_agents = getRandomNumberFromRange(no_of_movable_agents - len(agents)) + len(agents)
-
-  if len(rejected_state) > 0:
-    rejected_states.append(rejected_state)
 
   incharge_agent_position = [s for s in state if getInchargeAgent(general_facts) in s][0].split(" isat ")[1]
   for agent in agents:
@@ -259,10 +254,7 @@ def step(state, agents, no_of_movable_agents, rejected_state = []):
   is_looping = isStateInTheList(possible_new_state, history)
 
   if not is_looping and not is_rejected_state:
-    # verified = isAnyConstraintFailing(constraints_list, possible_new_state)
-    # if not verified:
     return possible_new_state
-    # return step(state, agents, no_of_movable_agents, list(possible_new_state))
   return step(state, agents, no_of_movable_agents)
 
 # Main
