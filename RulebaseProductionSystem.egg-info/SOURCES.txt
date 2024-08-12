@@ -6,3 +6,4 @@ RulebaseProductionSystem.egg-info/PKG-INFO
 RulebaseProductionSystem.egg-info/SOURCES.txt
 RulebaseProductionSystem.egg-info/dependency_links.txt
 RulebaseProductionSystem.egg-info/top_level.txt
+tests/test_planner.py
